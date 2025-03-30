@@ -1,7 +1,7 @@
-# Product Service
+# GraphQL API
 
 ## Description
-- __Simple product service, built with [Strawberry](https://strawberry.rocks/) and [FastAPI](https://fastapi.tiangolo.com/)__  
+- __Simple GraphQL API, built with [Strawberry](https://strawberry.rocks/) and [FastAPI](https://fastapi.tiangolo.com/)__  
 - __[Strawberry](https://strawberry.rocks/) is a developer friendly [GraphQL](https://graphql.org/) library for Python, designed for modern development.__  
 - __[GraphQL](https://graphql.org/) is a query language for APIs and a runtime for fulfilling queries with existing data. GraphQL provides a complete and understandable description of the data in API, gives clients the power to ask for exactly what they need and nothing more, makes it easier to evolve APIs over time, and enables powerful developer tools.__
 
@@ -58,103 +58,64 @@ If you'd like to contribute to this project, feel free to fork the repository an
 ├── pyproject.toml
 ├── README.md
 ├── src
-│   ├── common
-│   │   ├── base
-│   │   │   ├── dto.py
-│   │   │   ├── graphql
-│   │   │   │   ├── __init__.py
-│   │   │   │   ├── resolvers.py
-│   │   │   │   └── schemas.py
+│   ├── api
+│   │   ├── graphql
 │   │   │   ├── __init__.py
-│   │   │   ├── repo.py
-│   │   │   └── uow.py
+│   │   │   └── v1
+│   │   │       ├── converters
+│   │   │       │   ├── __init__.py
+│   │   │       │   ├── product.py
+│   │   │       │   ├── review.py
+│   │   │       │   └── user.py
+│   │   │       ├── exceptions.py
+│   │   │       ├── __init__.py
+│   │   │       ├── interfaces.py
+│   │   │       ├── mutations
+│   │   │       │   ├── __init__.py
+│   │   │       │   ├── inputs.py
+│   │   │       │   ├── mutation.py
+│   │   │       │   ├── product.py
+│   │   │       │   ├── review.py
+│   │   │       │   └── user.py
+│   │   │       ├── queries
+│   │   │       │   ├── __init__.py
+│   │   │       │   ├── product.py
+│   │   │       │   ├── query.py
+│   │   │       │   ├── review.py
+│   │   │       │   └── user.py
+│   │   │       ├── resolvers
+│   │   │       │   ├── base.py
+│   │   │       │   ├── __init__.py
+│   │   │       │   ├── product.py
+│   │   │       │   ├── review.py
+│   │   │       │   └── user.py
+│   │   │       └── utils.py
+│   │   └── __init__.py
+│   ├── core
 │   │   ├── constants.py
 │   │   ├── db
 │   │   │   ├── __init__.py
 │   │   │   └── sqlalchemy
 │   │   │       ├── base.py
-│   │   │       ├── config.py
 │   │   │       ├── extensions.py
 │   │   │       ├── __init__.py
 │   │   │       └── models.py
 │   │   ├── di.py
+│   │   ├── dto.py
 │   │   ├── exceptions.py
-│   │   ├── graphql
-│   │   │   ├── mutations.py
-│   │   │   ├── pagination.py
-│   │   │   └── query.py
 │   │   ├── __init__.py
-│   │   ├── logging
-│   │   │   ├── formatters.py
-│   │   │   ├── handlers.py
-│   │   │   ├── __init__.py
-│   │   │   └── loggers.py
-│   │   ├── middlewares.py
 │   │   ├── settings.py
-│   │   └── utils
-│   │       ├── fields.py
-│   │       ├── graphql.py
-│   │       ├── __init__.py
-│   │       └── parsers.py
+│   │   └── utils.py
 │   ├── __init__.py
 │   ├── main.py
-│   ├── products
-│   │   ├── dto.py
-│   │   ├── graphql
-│   │   │   ├── converters
-│   │   │   │   ├── products.py
-│   │   │   │   └── reviews.py
-│   │   │   ├── __init__.py
-│   │   │   ├── resolvers
-│   │   │   │   ├── __init__.py
-│   │   │   │   ├── products.py
-│   │   │   │   └── reviews.py
-│   │   │   └── schemas
-│   │   │       ├── __init__.py
-│   │   │       ├── products
-│   │   │       │   ├── __init__.py
-│   │   │       │   ├── inputs.py
-│   │   │       │   ├── mutations.py
-│   │   │       │   └── queries.py
-│   │   │       └── reviews
-│   │   │           ├── __init__.py
-│   │   │           ├── inputs.py
-│   │   │           ├── mutations.py
-│   │   │           └── queries.py
-│   │   ├── repositories
-│   │   │   ├── base.py
-│   │   │   └── sqlalchemy
-│   │   │       ├── products
-│   │   │       │   ├── __init__.py
-│   │   │       │   ├── repo.py
-│   │   │       │   └── uow.py
-│   │   │       └── reviews
-│   │   │           ├── __init__.py
-│   │   │           ├── repo.py
-│   │   │           └── uow.py
-│   │   └── services
-│   │       ├── products.py
-│   │       └── reviews.py
-│   └── users
-│       ├── dto.py
-│       ├── graphql
-│       │   ├── converter.py
-│       │   ├── __init__.py
-│       │   ├── resolver.py
-│       │   └── schemas
-│       │       ├── __init__.py
-│       │       ├── inputs.py
-│       │       ├── mutations.py
-│       │       └── queries.py
+│   └── repositories
+│       ├── base.py
 │       ├── __init__.py
-│       ├── repositories
-│       │   ├── base.py
-│       │   ├── __init__.py
-│       │   └── sqlalchemy
-│       │       ├── __init__.py
-│       │       ├── repo.py
-│       │       └── uow.py
-│       └── service.py
+│       └── sqlalchemy
+│           ├── __init__.py
+│           ├── product.py
+│           ├── review.py
+│           └── user.py
 └── tests
 ```
 

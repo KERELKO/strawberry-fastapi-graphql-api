@@ -1,17 +1,16 @@
 import asyncio
+
+import strawberry
 from dishka import make_async_container
 from dishka.integrations.fastapi import setup_dishka
 from fastapi import FastAPI
-
-import strawberry
 from strawberry.fastapi import GraphQLRouter
 
-from src.common.db.sqlalchemy.config import Database
-from src.common.di import AppContainer
-from src.common.graphql.query import Query
-from src.common.graphql.mutations import Mutation
-from src.common.settings import config
-
+from src.api.graphql.v1.mutations.mutation import Mutation
+from src.api.graphql.v1.queries.query import Query
+from src.core.db.sqlalchemy import Database
+from src.core.di import AppContainer
+from src.core.settings import config
 
 container = make_async_container(AppContainer())
 
