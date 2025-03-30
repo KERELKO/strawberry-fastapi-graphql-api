@@ -7,13 +7,13 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.12"
-strawberry-graphql = {extras = ["fastapi"], version = "^0.229.1"}
-pydantic-settings = "^2.2.1"
-sqlalchemy = "^2.0.30"
-asyncpg = "^0.29.0"
-punq = "^0.7.0"
-alembic = "^1.13.1"
-motor = "^3.4.0"
+strawberry-graphql = {extras = ["fastapi"], version = "^0.262.6"}
+pydantic-settings = "^2.8.1"
+sqlalchemy = "^2.0.40"
+alembic = "^1.15.2"
+dishka = "^1.5.1"
+asyncpg = "^0.30.0"
+uvicorn = "^0.34.0"
 
 
 [build-system]

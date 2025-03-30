@@ -1,12 +1,12 @@
 from src.common.exceptions import ObjectDoesNotExistException
-from src.common.utils.fields import SelectedFields
+from src.common.base.dto import SelectedFields
 from src.products.dto import ReviewDTO
 from src.products.repositories.base import AbstractReviewUnitOfWork
 
 
 class ReviewService:
     def _get_uow(self) -> AbstractReviewUnitOfWork:
-        from src.common.di import Container
+        from src.common.di import AppContainer
         uow: AbstractReviewUnitOfWork = Container.resolve(AbstractReviewUnitOfWork)
         return uow
 

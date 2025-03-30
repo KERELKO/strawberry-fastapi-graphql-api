@@ -7,8 +7,6 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from src.common.base.uow import AbstractUnitOfWork
 
-from .config import db
-
 
 class BaseSQLAlchemyRepository:
     def __init__(self, session: AsyncSession) -> None:
@@ -35,7 +33,7 @@ class BaseSQLAlchemyRepository:
 
 
 class BaseSQLAlchemyUnitOfWork(AbstractUnitOfWork):
-    def __init__(self, session_factory: async_sessionmaker = db.async_session_factory) -> None:
+    def __init__(self, session_factory: async_sessionmaker) -> None:
         self.session_factory = session_factory
 
     async def __aenter__(self) -> None:

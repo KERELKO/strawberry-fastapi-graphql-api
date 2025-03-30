@@ -1,7 +1,7 @@
 from strawberry.types.nodes import Selection
 from strawberry.utils.str_converters import to_snake_case
 
-from src.common.utils.fields import SelectedFields
+from src.common.base.dto import SelectedFields
 
 
 class BaseStrawberryResolver:
@@ -24,6 +24,7 @@ class BaseStrawberryResolver:
                     list_fields.append(f'{field.name}.{related_field.name}')
         return list_fields
 
+    @classmethod
     def _selections_to_selected_fields(
         cls,
         fields: list[Selection],

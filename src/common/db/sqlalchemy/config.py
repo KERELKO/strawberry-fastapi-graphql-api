@@ -1,5 +1,4 @@
 import asyncio
-from logging import Logger
 
 from sqlalchemy import event
 from sqlalchemy.ext.asyncio import (
@@ -8,6 +7,7 @@ from sqlalchemy.ext.asyncio import (
     create_async_engine,
 )
 
+from src.common.logging.loggers import logger
 from src.common.settings import config
 
 from .models import Base
@@ -37,12 +37,6 @@ class Database:
         if self.config.LISTEN_SQL_QUERIES:
             @event.listens_for(self.engine.sync_engine, 'before_execute')
             def sql_statement_listener(conn, clauseelement, multiparams, params):
-                from src.common.di import Container
-
-                logger = Container.resolve(Logger)
                 if config.DEBUG:
                     print(f'{'SQL stmt':-^40}\n{clauseelement}\n{'':-^40}')
                 logger.info(f'SQL stmt: {clauseelement}')
-
-
-db = Database()

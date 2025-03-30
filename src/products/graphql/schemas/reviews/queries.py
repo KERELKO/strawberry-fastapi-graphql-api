@@ -1,7 +1,9 @@
 import strawberry
 
+from src.common.utils import get_container
+
 from src.common.graphql.base.schemas import IDeleted, IProduct, IReview, IUser
-from src.common.exceptions import IDIsNotProvided
+from src.common.exceptions import IDNotProvided
 
 
 @strawberry.type
@@ -24,9 +26,8 @@ class Review(IReview):
     @strawberry.field
     async def product(self, info: strawberry.Info) -> IProduct | None:
         from src.products.graphql.resolvers.products import StrawberryProductResolver
-        from src.common.di import Container
-
-        resolver: StrawberryProductResolver = Container.resolve(StrawberryProductResolver)
+        container = get_container(info)
+        resolver: StrawberryProductResolver = await container.get(StrawberryProductResolver)
         if self._product is not None:
             return self._product
         if self._product_id:
@@ -35,7 +36,7 @@ class Review(IReview):
             )
         else:
             if not self.id:
-                raise IDIsNotProvided('Hint: add field \'id\' to the query schema')
+                raise IDNotProvided('Hint: add field \'id\' to the query schema')
             product = await resolver.get_by_review_id(
                 review_id=self.id, fields=info.selected_fields,
             )
@@ -44,13 +45,13 @@ class Review(IReview):
     @strawberry.field
     async def user(self, info: strawberry.Info) -> IUser | None:
         from src.users.graphql.resolver import StrawberryUserResolver
-        from src.common.di import Container
 
-        resolver: StrawberryUserResolver = Container.resolve(StrawberryUserResolver)
+        container = get_container(info)
+        resolver: StrawberryUserResolver = await container.get(StrawberryUserResolver)
         if self._user is not None:
             return self._user
         if not self.id:
-            raise IDIsNotProvided('Hint: add field \'id\' to the query schema')
+            raise IDNotProvided('Hint: add field \'id\' to the query schema')
         if self._user_id:
             user = await resolver.get(
                 id=self._user_id, fields=info.selected_fields,

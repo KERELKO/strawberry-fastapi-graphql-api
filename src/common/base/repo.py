@@ -1,7 +1,7 @@
 from abc import ABC
 from typing import Generic, TypeVar
 
-from src.common.utils.fields import SelectedFields
+from src.common.base.dto import SelectedFields
 
 
 T = TypeVar('T')
@@ -19,7 +19,7 @@ class AbstractRepository(Generic[T], ABC):
     ) -> list[T]:
         raise NotImplementedError
 
-    async def create(self, dto: T) -> T:
+    async def add(self, dto: T) -> T:
         raise NotImplementedError
 
     async def update(self, id: int, dto: T) -> T | None:

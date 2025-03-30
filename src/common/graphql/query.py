@@ -1,6 +1,5 @@
 import strawberry
 
-from src.common.di import Container
 from src.products.graphql.resolvers.products import StrawberryProductResolver
 from src.products.graphql.resolvers.reviews import StrawberryReviewResolver
 from src.products.graphql.schemas.products.queries import Product
@@ -8,18 +7,22 @@ from src.products.graphql.schemas.reviews.queries import Review
 from src.users.graphql.resolver import StrawberryUserResolver
 from src.users.graphql.schemas.queries import User
 
+from src.common.utils import get_container
+
 
 @strawberry.type
 class Query:
     @strawberry.field
     async def user(self, id: strawberry.ID, info: strawberry.Info) -> User | None:
-        resolver: StrawberryUserResolver = Container.resolve(StrawberryUserResolver)
+        container = get_container(info)
+        resolver = await container.get(StrawberryUserResolver)
         user = await resolver.get(id=id, fields=info.selected_fields)
         return user
 
     @strawberry.field
     async def users(self, info: strawberry.Info, offset: int = 0, limit: int = 20) -> list[User]:
-        resolver: StrawberryUserResolver = Container.resolve(StrawberryUserResolver)
+        container = get_container(info)
+        resolver = await container.get(StrawberryUserResolver)
         users: list[User] = await resolver.get_list(
             fields=info.selected_fields,
             offset=offset,
@@ -29,7 +32,8 @@ class Query:
 
     @strawberry.field
     async def review(self, id: strawberry.ID, info: strawberry.Info) -> Review | None:
-        resolver: StrawberryReviewResolver = Container.resolve(StrawberryReviewResolver)
+        container = get_container(info)
+        resolver = await container.get(StrawberryReviewResolver)
         review = await resolver.get(
             id=id, fields=info.selected_fields,
         )
@@ -42,7 +46,8 @@ class Query:
         offset: int = 0,
         limit: int = 20,
     ) -> list[Review]:
-        resolver: StrawberryReviewResolver = Container.resolve(StrawberryReviewResolver)
+        container = get_container(info)
+        resolver = await container.get(StrawberryReviewResolver)
         reviews: list[Review] = await resolver.get_list(
             fields=info.selected_fields,
             offset=offset,
@@ -52,7 +57,8 @@ class Query:
 
     @strawberry.field
     async def product(self, id: strawberry.ID, info: strawberry.Info) -> Product | None:
-        resolver: StrawberryProductResolver = Container.resolve(StrawberryProductResolver)
+        container = get_container(info)
+        resolver = await container.get(StrawberryProductResolver)
         product = await resolver.get(
             id=id, fields=info.selected_fields,
         )
@@ -65,7 +71,8 @@ class Query:
         offset: int = 0,
         limit: int = 20,
     ) -> list[Product]:
-        resolver: StrawberryProductResolver = Container.resolve(StrawberryProductResolver)
+        container = get_container(info)
+        resolver = await container.get(StrawberryProductResolver)
         products: list[Product] = await resolver.get_list(
             fields=info.selected_fields,
             offset=offset,

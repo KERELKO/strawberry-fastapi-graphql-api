@@ -1,74 +1,72 @@
-from functools import cache
-from typing import TypeVar
-import logging
+from typing import AsyncGenerator
+from dishka import Provider, provide, Scope
 
-import punq
-
+from src.common.db.sqlalchemy.config import Database
 from src.products.graphql.resolvers.products import StrawberryProductResolver
 from src.products.graphql.resolvers.reviews import StrawberryReviewResolver
 from src.users.graphql.resolver import StrawberryUserResolver
 
 from src.products.repositories.base import (
     AbstractReviewRepository,
-    AbstractProductUnitOfWork,
     AbstractProductRepository,
-    AbstractReviewUnitOfWork,
 )
 from src.products.repositories.sqlalchemy.products.repo import (
     SQLAlchemyAggregatedProductRepository,
 )
-from src.products.repositories.sqlalchemy.products.uow import SQLAlchemyProductUnitOfWork
 from src.products.repositories.sqlalchemy.reviews.repo import (
     SQLAlchemyAggregatedReviewRepository,
 )
-from src.products.repositories.sqlalchemy.reviews.uow import SQLAlchemyReviewUnitOfWork
-
-from src.products.services.products import ProductService
-from src.products.services.reviews import ReviewService
-from src.users.repositories.base import AbstractUserRepository, AbstractUserUnitOfWork
+from src.users.repositories.base import AbstractUserRepository
 from src.users.repositories.sqlalchemy.repo import (
     SQLAlchemyAggregatedUserRepository,
 )
-from src.users.repositories.sqlalchemy.uow import SQLAlchemyUserUnitOfWork
-from src.users.service import UserService
 
 
-BaseClass = TypeVar('BaseClass')
-Impl = TypeVar('Impl')
+class AppContainer(Provider):
+    @provide(scope=Scope.APP)
+    def database(self) -> Database:
+        return Database()
 
+    @provide(scope=Scope.REQUEST, cache=False)
+    async def user_repository(
+        self,
+        db: Database,
+    ) -> AsyncGenerator[AbstractUserRepository, None]:
+        session = db.async_session_factory()
+        async with session:
+            yield SQLAlchemyAggregatedUserRepository(session)
 
-class Container:
-    @staticmethod
-    def get() -> punq.Container:
-        return Container._init()
+    @provide(scope=Scope.REQUEST, cache=False)
+    async def product_repository(
+        self,
+        db: Database,
+    ) -> AsyncGenerator[AbstractProductRepository, None]:
+        session = db.async_session_factory()
+        async with session:
+            yield SQLAlchemyAggregatedProductRepository(session)
 
-    @staticmethod
-    def resolve(base_cls: type[BaseClass]) -> Impl:
-        return Container.get().resolve(base_cls)
+    @provide(scope=Scope.REQUEST, cache=False)
+    async def review_repository(
+        self, db: Database,
+    ) -> AsyncGenerator[AbstractReviewRepository, None]:
+        session = db.async_session_factory()
+        async with session:
+            yield SQLAlchemyAggregatedReviewRepository(session)
 
-    @staticmethod
-    @cache
-    def _init() -> punq.Container:
-        container = punq.Container()
+    @provide(scope=Scope.REQUEST, cache=False)
+    def strawberry_review_resolver(
+        self, repository: AbstractReviewRepository,
+    ) -> StrawberryReviewResolver:
+        return StrawberryReviewResolver(repository)
 
-        logger = logging.getLogger('Logger')
-        container.register(logging.Logger, instance=logger)
+    @provide(scope=Scope.REQUEST, cache=False)
+    def strawberry_product_resolver(
+        self, repository: AbstractProductRepository,
+    ) -> StrawberryProductResolver:
+        return StrawberryProductResolver(repository)
 
-        container.register(AbstractUserRepository, SQLAlchemyAggregatedUserRepository)
-        container.register(AbstractUserUnitOfWork, SQLAlchemyUserUnitOfWork)
-
-        container.register(AbstractReviewRepository, SQLAlchemyAggregatedReviewRepository)
-        container.register(AbstractReviewUnitOfWork, SQLAlchemyReviewUnitOfWork)
-
-        container.register(AbstractProductRepository, SQLAlchemyAggregatedProductRepository)
-        container.register(AbstractProductUnitOfWork, SQLAlchemyProductUnitOfWork)
-
-        container.register(ReviewService)
-        container.register(ProductService)
-        container.register(UserService)
-
-        container.register(StrawberryReviewResolver)
-        container.register(StrawberryProductResolver)
-        container.register(StrawberryUserResolver)
-
-        return container
+    @provide(scope=Scope.REQUEST, cache=False)
+    def strawberry_user_resolver(
+        self, repository: AbstractUserRepository,
+    ) -> StrawberryUserResolver:
+        return StrawberryUserResolver(repository)

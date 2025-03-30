@@ -2,7 +2,7 @@ from abc import abstractmethod
 
 from src.common.base.uow import AbstractUnitOfWork
 from src.common.base.repo import AbstractRepository
-from src.common.utils.fields import SelectedFields
+from src.common.base.dto import SelectedFields
 from src.users.dto import UserDTO
 
 

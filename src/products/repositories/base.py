@@ -1,6 +1,6 @@
 from abc import abstractmethod
 
-from src.common.utils.fields import SelectedFields
+from src.common.base.dto import SelectedFields
 from src.products.dto import ProductDTO, ReviewDTO
 from src.common.base.repo import AbstractRepository
 from src.common.base.uow import AbstractUnitOfWork

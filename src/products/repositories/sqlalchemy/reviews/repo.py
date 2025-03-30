@@ -10,7 +10,7 @@ from src.common.db.sqlalchemy.extensions import (
     sqlalchemy_repo_extended,
 )
 from src.common.db.sqlalchemy.models import ReviewORM
-from src.common.utils.fields import SelectedFields
+from src.common.base.dto import SelectedFields
 from src.products.dto import ProductDTO, ReviewDTO
 from src.users.dto import UserDTO
 

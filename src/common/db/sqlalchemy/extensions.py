@@ -5,7 +5,7 @@ import sqlalchemy as sql
 from src.common.exceptions import ObjectDoesNotExistException
 from src.common.base.dto import BaseDTO, Entity
 from src.common.utils import raise_exc
-from src.common.utils.fields import SelectedFields
+from src.common.base.dto import SelectedFields
 from src.users.dto import UserDTO
 from src.products.dto import ReviewDTO, ProductDTO
 
@@ -44,7 +44,7 @@ class MetaSQLAlchemyRepository(type):
     ) -> 'MetaSQLAlchemyRepository':
         if 'Meta' in cls_dict:
             model = cls_dict['Meta'].model
-            cls_dict['create'] = _create_method(model)
+            cls_dict['create'] = _add_method(model)
             cls_dict['update'] = _update_method(model)
             cls_dict['delete'] = _delete_method(model)
             cls_dict['_construct_select_query'] = _select_query_constructor(model=model)
@@ -55,7 +55,7 @@ class MetaSQLAlchemyRepository(type):
 def sqlalchemy_repo_extended(
     cls: type | None = None,
     get: bool = True,
-    create: bool = True,
+    add: bool = True,
     update: bool = True,
     delete: bool = True,
     query_executor: bool = True,
@@ -63,7 +63,7 @@ def sqlalchemy_repo_extended(
     """
     Extend repository class with the following methods:
     * get
-    * create
+    * add
     * update
     * delete
 
@@ -82,8 +82,8 @@ def sqlalchemy_repo_extended(
                 f'{cls.__name__} does not have "Meta" class inside with defined sqlalchemy model'
             )
         model = cls.__dict__['Meta'].model
-        if create:
-            setattr(cls, 'create', _create_method(model=model))
+        if add:
+            setattr(cls, 'add', _add_method(model=model))
         if delete:
             setattr(cls, 'delete', _delete_method(model=model))
         if update:
@@ -103,8 +103,8 @@ def sqlalchemy_repo_extended(
     return wrapper(cls)
 
 
-def _create_method(model: Type[SQLAlchemyModel]) -> Callable:
-    async def create(self, dto: TypeDTO, commit_after_creation: bool = True) -> TypeDTO:
+def _add_method(model: Type[SQLAlchemyModel]) -> Callable:
+    async def add(self, dto: TypeDTO, commit_after_creation: bool = True) -> TypeDTO:
         values = dto.model_dump()
         new_entity = model(**values)
         self.session.add(new_entity)
@@ -112,7 +112,7 @@ def _create_method(model: Type[SQLAlchemyModel]) -> Callable:
             await self.session.commit()
             dto.id = new_entity.id
         return dto
-    return create
+    return add
 
 
 def _get_method(model: Type[SQLAlchemyModel]) -> Callable:

@@ -1,5 +1,7 @@
 import strawberry
 
+from src.common.utils import get_container
+
 from src.common.graphql.base.schemas import IDeleted, IUser
 from src.common.graphql.utils import get_required_fields
 from src.products.graphql.resolvers.reviews import StrawberryReviewResolver
@@ -23,9 +25,8 @@ class User(IUser):
         offset: int = 0,
         limit: int = 20,
     ) -> list[Review]:
-        from src.common.di import Container
-
-        resolver: StrawberryReviewResolver = Container.resolve(StrawberryReviewResolver)
+        container = get_container(info)
+        resolver: StrawberryReviewResolver = await container.get(StrawberryReviewResolver)
         if self._reviews:
             return self._reviews
         if not self.id:

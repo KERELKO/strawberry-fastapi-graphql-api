@@ -12,7 +12,7 @@ from src.common.db.sqlalchemy.extensions import (
 )
 from src.common.db.sqlalchemy.models import ReviewORM, UserORM
 from src.common.exceptions import ObjectDoesNotExistException
-from src.common.utils.fields import SelectedFields
+from src.common.base.dto import SelectedFields
 from src.products.dto import ReviewDTO
 from src.users.dto import UserDTO
 from src.users.repositories.base import AbstractUserRepository

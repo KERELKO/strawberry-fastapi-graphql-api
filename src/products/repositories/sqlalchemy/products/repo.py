@@ -8,7 +8,7 @@ from src.common.db.sqlalchemy.extensions import models_to_join, sqlalchemy_repo_
 from src.common.db.sqlalchemy.models import ProductORM, ReviewORM
 from src.common.exceptions import ObjectDoesNotExistException
 from src.common.utils import raise_exc
-from src.common.utils.fields import SelectedFields
+from src.common.base.dto import SelectedFields
 from src.products.dto import ProductDTO, ReviewDTO
 
 

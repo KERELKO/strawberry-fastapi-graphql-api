@@ -1,24 +1,18 @@
 from src.common.exceptions import ObjectDoesNotExistException
-from src.common.utils.fields import SelectedFields
+from src.common.base.dto import SelectedFields
 from src.products.dto import ProductDTO
-from src.products.repositories.base import AbstractProductUnitOfWork
+from src.products.repositories.base import AbstractProductRepository
 
 
 class ProductService:
-    def _get_uow(self) -> AbstractProductUnitOfWork:
-        from src.common.di import Container
-        uow: AbstractProductUnitOfWork = Container.resolve(AbstractProductUnitOfWork)
-        return uow
+    def __init__(self, repository: AbstractProductRepository):
+        self.repository = repository
 
     async def get_product_by_id(self, id: int, fields: list[SelectedFields]) -> ProductDTO | None:
-        uow = self._get_uow()
-        async with uow:
-            try:
-                product = await uow.products.get(
-                    fields=fields, id=id
-                )
-            except ObjectDoesNotExistException:
-                product = None
+        try:
+            product = await self.repository.get(fields=fields, id=id)
+        except ObjectDoesNotExistException:
+            return None
         return product
 
     async def get_products_list(
@@ -27,12 +21,7 @@ class ProductService:
         offset: int = 0,
         limit: int = 20,
     ) -> list[ProductDTO]:
-        uow = self._get_uow()
-        async with uow:
-            products = await uow.products.get_list(
-                fields=fields, offset=offset, limit=limit,
-            )
-            await uow.commit()
+        products = await self.repository.get_list(fields=fields, offset=offset, limit=limit)
         return products
 
     async def get_by_review_id(
@@ -40,37 +29,25 @@ class ProductService:
         review_id: int,
         fields: list[SelectedFields],
     ) -> ProductDTO | None:
-        uow = self._get_uow()
-        async with uow:
-            try:
-                product = await uow.products.get_by_review_id(
-                    fields=fields, review_id=review_id,
-                )
-            except ObjectDoesNotExistException:
-                product = None
-            await uow.commit()
+        try:
+            product = await self.repository.get_by_review_id(
+                fields=fields, review_id=review_id,
+            )
+        except ObjectDoesNotExistException:
+            return None
         return product
 
     async def create_product(self, dto: ProductDTO) -> ProductDTO:
-        uow = self._get_uow()
-        async with uow:
-            new_product: ProductDTO = await uow.products.create(dto=dto)
-            await uow.commit()
+        new_product: ProductDTO = await self.repository.create(dto=dto)
         return new_product
 
     async def update_product(self, id: int, dto: ProductDTO) -> ProductDTO | None:
-        uow = self._get_uow()
-        async with uow:
-            try:
-                updated_product: ProductDTO | None = await uow.products.update(dto=dto, id=id)
-            except ObjectDoesNotExistException:
-                updated_product = None
-            await uow.commit()
+        try:
+            updated_product: ProductDTO | None = await self.repository.update(dto=dto, id=id)
+        except ObjectDoesNotExistException:
+            return None
         return updated_product
 
     async def delete_product(self, id: int) -> bool:
-        uow = self._get_uow()
-        async with uow:
-            is_deleted = await uow.products.delete(id=id)
-            await uow.commit()
+        is_deleted = await self.repository.delete(id=id)
         return is_deleted

@@ -15,7 +15,7 @@ class ObjectDoesNotExistException(ApplicationException):
 
 
 @dataclass(eq=False)
-class IDIsNotProvided(ApplicationException):
+class IDNotProvided(ApplicationException):
     custom_message: str | None = None
 
     def __str__(self) -> str:
