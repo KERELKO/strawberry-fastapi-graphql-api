@@ -3,19 +3,16 @@ from typing import Any, Sequence
 import sqlalchemy as sql
 from sqlalchemy.orm import joinedload
 
-from src.core.db.sqlalchemy.base import BaseSQLAlchemyRepository
-from src.core.db.sqlalchemy.extensions import models_to_join, sqlalchemy_repo_extended
+from src.core.db.sqlalchemy.base import BaseSQLAlchemyGateway
+from src.core.db.sqlalchemy.extensions import models_to_join, sqlalchemy_crud
 from src.core.db.sqlalchemy.models import ProductORM, ReviewORM
 from src.core.exceptions import ObjectDoesNotExistException
 from src.core.utils import raise_exc
 from src.core.dto import SelectedFields, ProductDTO, ReviewDTO
 
 
-@sqlalchemy_repo_extended(query_executor=False)
-class SQLAlchemyProductRepository(BaseSQLAlchemyRepository):
-    class Meta:
-        model = ProductORM
-
+@sqlalchemy_crud(query_executor=False, model=ProductORM)
+class SQLAlchemyProductGateway(BaseSQLAlchemyGateway):
     def _construct_select_query(
         self,
         fields: list[SelectedFields],
@@ -61,7 +58,7 @@ class SQLAlchemyProductRepository(BaseSQLAlchemyRepository):
         return dto_list
 
 
-class SQLAlchemyAggregatedProductRepository(SQLAlchemyProductRepository):
+class SQLAlchemyAggregatedProductGateway(SQLAlchemyProductGateway):
     async def _fetch_one_with_related(self, join_reviews: bool, **filters) -> ProductORM | None:
         product_id = filters.get('id', None)
         review_id = filters.get('review_id', None)

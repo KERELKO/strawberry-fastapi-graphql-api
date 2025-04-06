@@ -19,38 +19,9 @@ SQLAlchemyModel = TypeVar('SQLAlchemyModel', bound=UserORM | ProductORM | Review
 TypeDTO = TypeVar('TypeDTO', bound=BaseDTO)
 
 
-class MetaSQLAlchemyRepository(type):
-    """
-    Extends subclass with the following methods:
-    * create
-    * update
-    * delete
-    * _construct_select_query
-    * _execute_query
-
-    All async
-
-    The subclass must implement Meta class
-    inside with a variable that contains SQLAlchemy model type
-    """
-    def __new__(
-        meta_cls,  # type: ignore
-        cls_name: str,
-        bases: tuple[Type[Any], ...],
-        cls_dict: dict[str, Any]
-    ) -> 'MetaSQLAlchemyRepository':
-        if 'Meta' in cls_dict:
-            model = cls_dict['Meta'].model
-            cls_dict['create'] = _add_method(model)
-            cls_dict['update'] = _update_method(model)
-            cls_dict['delete'] = _delete_method(model)
-            cls_dict['_construct_select_query'] = _select_query_constructor(model=model)
-            cls_dict['_execute_query'] = _query_executor()
-        return super().__new__(meta_cls, cls_name, bases, cls_dict)
-
-
-def sqlalchemy_repo_extended(
+def sqlalchemy_crud(
     cls: type | None = None,
+    model: type[SQLAlchemyModel] | None = None,
     get: bool = True,
     add: bool = True,
     update: bool = True,
@@ -74,29 +45,32 @@ def sqlalchemy_repo_extended(
     """
 
     def wrapper(cls) -> type:
-        if 'Meta' not in cls.__dict__:
-            raise AttributeError(
-                f'{cls.__name__} does not have "Meta" class inside with defined sqlalchemy model'
-            )
-        model = cls.__dict__['Meta'].model
+        if model is None:
+            if 'Meta' not in cls.__dict__:
+                raise AttributeError(
+                    f'{cls.__name__} does not have "Meta" class inside with defined sqlalchemy model'
+                )
+            _model = cls.__dict__['Meta'].model
+        else:
+            _model = model
         if add:
-            setattr(cls, 'add', _add_method(model=model))
+            setattr(cls, 'add', _add_method(model=_model))
         if delete:
-            setattr(cls, 'delete', _delete_method(model=model))
+            setattr(cls, 'delete', _delete_method(model=_model))
         if update:
-            setattr(cls, 'update', _update_method(model=model))
+            setattr(cls, 'update', _update_method(model=_model))
         if get:
-            setattr(cls, 'get', _get_method(model=model))
+            setattr(cls, 'get', _get_method(model=_model))
         if query_executor:
-            setattr(cls, '_construct_select_query', _select_query_constructor(model=model))
+            setattr(cls, '_construct_select_query', _select_query_constructor(model=_model))
             setattr(cls, '_execute_query', _query_executor())
         return cls
 
-    # with params: @sqlalchemy_repo_extended(...)
+    # with params: @sqlalchemy_crud(...)
     if cls is None:
         return wrapper
 
-    # without params: @sqlalchemy_repo_extended
+    # without params: @sqlalchemy_crud
     return wrapper(cls)
 
 

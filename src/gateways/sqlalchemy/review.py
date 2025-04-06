@@ -3,21 +3,18 @@ from typing import Sequence
 import sqlalchemy as sql
 from sqlalchemy.orm import joinedload
 
-from src.core.db.sqlalchemy.base import BaseSQLAlchemyRepository
+from src.core.db.sqlalchemy.base import BaseSQLAlchemyGateway
 from src.core.db.sqlalchemy.extensions import (
     models_to_join,
     raise_exc,
-    sqlalchemy_repo_extended,
+    sqlalchemy_crud,
 )
 from src.core.db.sqlalchemy.models import ReviewORM
 from src.core.dto import SelectedFields, UserDTO, ProductDTO, ReviewDTO
 
 
-@sqlalchemy_repo_extended(query_executor=False)
-class SQLAlchemyReviewRepository(BaseSQLAlchemyRepository):
-    class Meta:
-        model = ReviewORM
-
+@sqlalchemy_crud(query_executor=False, model=ReviewORM)
+class SQLAlchemyReviewGateway(BaseSQLAlchemyGateway):
     def _construct_select_query(self, fields: list[SelectedFields], **queries) -> sql.Select:
         _fields = fields[0] if len(fields) > 0 else raise_exc(Exception('No fields'))
         fields_to_select = [getattr(ReviewORM, f) for f in _fields.fields]
@@ -62,7 +59,7 @@ class SQLAlchemyReviewRepository(BaseSQLAlchemyRepository):
         return dto_list
 
 
-class SQLAlchemyAggregatedReviewRepository(SQLAlchemyReviewRepository):
+class SQLAlchemyAggregatedReviewGateway(SQLAlchemyReviewGateway):
     """
     Special repository that allows to `solve N+1 problem`
     when retrieve single or mutiple models from the database

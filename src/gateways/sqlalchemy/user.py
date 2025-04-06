@@ -4,20 +4,16 @@ import sqlalchemy as sql
 from sqlalchemy.orm import joinedload
 from sqlalchemy.orm.attributes import InstrumentedAttribute
 
-from src.core.db.sqlalchemy.base import BaseSQLAlchemyRepository
+from src.core.db.sqlalchemy.base import BaseSQLAlchemyGateway
 from src.core.db.sqlalchemy.extensions import (models_to_join, raise_exc,
-                                               sqlalchemy_repo_extended)
+                                               sqlalchemy_crud)
 from src.core.db.sqlalchemy.models import ReviewORM, UserORM
 from src.core.dto import ReviewDTO, SelectedFields, UserDTO
 from src.core.exceptions import ObjectDoesNotExistException
-from src.repositories.base import AbstractUserRepository
 
 
-@sqlalchemy_repo_extended(query_executor=False)
-class SQLAlchemyUserRepository(AbstractUserRepository, BaseSQLAlchemyRepository):
-    class Meta:
-        model = UserORM
-
+@sqlalchemy_crud(query_executor=False, model=UserORM)
+class SQLAlchemyUserGateway(BaseSQLAlchemyGateway):
     def _construct_select_query(
         self,
         fields: list[SelectedFields],
@@ -64,7 +60,7 @@ class SQLAlchemyUserRepository(AbstractUserRepository, BaseSQLAlchemyRepository)
         return UserDTO(**data)
 
 
-class SQLAlchemyAggregatedUserRepository(SQLAlchemyUserRepository):
+class SQLAlchemyAggregatedUserGateway(SQLAlchemyUserGateway):
     async def _fetch_one_with_related(self, join_reviews: bool, **filters) -> UserORM | None:
         user_id = filters.get('id', None)
         review_id = filters.get('review_id', None)

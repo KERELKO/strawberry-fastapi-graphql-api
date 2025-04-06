@@ -3,19 +3,20 @@ from dataclasses import dataclass
 import strawberry
 from strawberry.types.nodes import Selection
 
+from src.api.graphql.v1.converters.review import StrawberryReviewConverter
 from src.api.graphql.v1.interfaces import IDeleted
-from src.core.exceptions import ObjectDoesNotExistException
-from .base import BaseStrawberryResolver
-from src.core.dto import ReviewDTO, SelectedFields, CreateReviewDTO
 from src.api.graphql.v1.mutations.inputs import ReviewInput, UpdateReviewInput
 from src.api.graphql.v1.queries.review import Review
-from src.api.graphql.v1.converters.review import StrawberryReviewConverter
-from src.repositories.base import AbstractReviewRepository
+from src.core.dto import CreateReviewDTO, ReviewDTO, SelectedFields
+from src.core.exceptions import ObjectDoesNotExistException
+from src.gateways.base import ReviewGateway
+
+from .base import BaseStrawberryResolver
 
 
 @dataclass(eq=False, repr=False)
 class StrawberryReviewResolver(BaseStrawberryResolver):
-    repository: AbstractReviewRepository
+    gw: ReviewGateway
 
     async def get_list(
         self,
@@ -28,7 +29,7 @@ class StrawberryReviewResolver(BaseStrawberryResolver):
         required_fields: list[SelectedFields] = self._selections_to_selected_fields(
             fields, remove_related=False,
         )
-        reviews = await self.repository.get_list(
+        reviews = await self.gw.get_list(
             fields=required_fields,
             offset=offset,
             limit=limit,
@@ -42,7 +43,7 @@ class StrawberryReviewResolver(BaseStrawberryResolver):
             fields, remove_related=False,
         )
         try:
-            review = await self.repository.get(fields=required_fields, id=int(id))
+            review = await self.gw.get(fields=required_fields, id=int(id))
         except ObjectDoesNotExistException:
             return None
         return StrawberryReviewConverter.convert(review) if review else None
@@ -53,7 +54,7 @@ class StrawberryReviewResolver(BaseStrawberryResolver):
         data['product_id'] = int(data['product_id'])
 
         dto = CreateReviewDTO(**data)
-        new_review = await self.repository.add(dto=dto)
+        new_review = await self.gw.add(dto=dto)
 
         data = new_review.model_dump()
         data['_product_id'] = data.pop('product_id')
@@ -64,7 +65,7 @@ class StrawberryReviewResolver(BaseStrawberryResolver):
     async def update(self, id: strawberry.ID, input: UpdateReviewInput) -> Review | None:
         dto = ReviewDTO(**strawberry.asdict(input))
         try:
-            review = await self.repository.update_review(id=int(id), dto=dto)
+            review = await self.gw.update(id=int(id), dto=dto)
         except ObjectDoesNotExistException:
             return None
         data = review.model_dump()
@@ -73,5 +74,5 @@ class StrawberryReviewResolver(BaseStrawberryResolver):
         return Review(**data)
 
     async def delete(self, id: strawberry.ID) -> IDeleted:
-        is_deleted = await self.repository.delete_review(id=int(id))
+        is_deleted = await self.gw.delete(id=int(id))
         return IDeleted(success=is_deleted)

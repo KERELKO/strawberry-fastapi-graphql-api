@@ -1,19 +1,19 @@
 from typing import AsyncGenerator
-from dishka import Provider, provide, Scope
+from dishka import AnyOf, Provider, provide, Scope
 
 from src.core.db.sqlalchemy import Database
 from src.api.graphql.v1.resolvers.product import StrawberryProductResolver
 from src.api.graphql.v1.resolvers.review import StrawberryReviewResolver
 from src.api.graphql.v1.resolvers.user import StrawberryUserResolver
 
-from src.repositories.base import (
-    AbstractReviewRepository,
-    AbstractProductRepository,
-    AbstractUserRepository,
+from src.gateways.base import (
+    ReviewGateway,
+    ProductGateway,
+    UserGateway,
 )
-from src.repositories.sqlalchemy.product import SQLAlchemyAggregatedProductRepository
-from src.repositories.sqlalchemy.review import SQLAlchemyAggregatedReviewRepository
-from src.repositories.sqlalchemy.user import SQLAlchemyAggregatedUserRepository
+from src.gateways.sqlalchemy.product import SQLAlchemyAggregatedProductGateway
+from src.gateways.sqlalchemy.review import SQLAlchemyAggregatedReviewGateway
+from src.gateways.sqlalchemy.user import SQLAlchemyAggregatedUserGateway
 
 
 class AppContainer(Provider):
@@ -25,42 +25,51 @@ class AppContainer(Provider):
     async def user_repository(
         self,
         db: Database,
-    ) -> AsyncGenerator[AbstractUserRepository, None]:
+    ) -> AnyOf[
+        AsyncGenerator[UserGateway, None],
+        AsyncGenerator[SQLAlchemyAggregatedUserGateway, None],
+    ]:
         session = db.async_session_factory()
         async with session:
-            yield SQLAlchemyAggregatedUserRepository(session)
+            yield SQLAlchemyAggregatedUserGateway(session)
 
     @provide(scope=Scope.REQUEST, cache=False)
     async def product_repository(
         self,
         db: Database,
-    ) -> AsyncGenerator[AbstractProductRepository, None]:
+    ) -> AnyOf[
+        AsyncGenerator[ProductGateway, None],
+        AsyncGenerator[SQLAlchemyAggregatedProductGateway, None],
+    ]:
         session = db.async_session_factory()
         async with session:
-            yield SQLAlchemyAggregatedProductRepository(session)
+            yield SQLAlchemyAggregatedProductGateway(session)
 
     @provide(scope=Scope.REQUEST, cache=False)
     async def review_repository(
         self, db: Database,
-    ) -> AsyncGenerator[AbstractReviewRepository, None]:
+    ) -> AnyOf[
+        AsyncGenerator[ReviewGateway, None],
+        AsyncGenerator[SQLAlchemyAggregatedReviewGateway, None],
+    ]:
         session = db.async_session_factory()
         async with session:
-            yield SQLAlchemyAggregatedReviewRepository(session)
+            yield SQLAlchemyAggregatedReviewGateway(session)
 
     @provide(scope=Scope.REQUEST, cache=False)
     def strawberry_review_resolver(
-        self, repository: AbstractReviewRepository,
+        self, repository: ReviewGateway,
     ) -> StrawberryReviewResolver:
         return StrawberryReviewResolver(repository)
 
     @provide(scope=Scope.REQUEST, cache=False)
     def strawberry_product_resolver(
-        self, repository: AbstractProductRepository,
+        self, repository: ProductGateway,
     ) -> StrawberryProductResolver:
         return StrawberryProductResolver(repository)
 
     @provide(scope=Scope.REQUEST, cache=False)
     def strawberry_user_resolver(
-        self, repository: AbstractUserRepository,
+        self, repository: UserGateway,
     ) -> StrawberryUserResolver:
         return StrawberryUserResolver(repository)

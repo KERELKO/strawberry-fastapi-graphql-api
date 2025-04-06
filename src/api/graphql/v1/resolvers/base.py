@@ -15,13 +15,15 @@ class BaseStrawberryResolver:
         for field in fields:
             if remove_related:
                 if not field.selections:
-                    list_fields.append(to_snake_case(field.name))
+                    list_fields.append(to_snake_case(field.name))  # type: ignore[union-attr]
             else:
                 if not field.selections:
-                    list_fields.append(to_snake_case(field.name))
+                    list_fields.append(to_snake_case(field.name))  # type: ignore[union-attr]
                     continue
                 for related_field in field.selections:
-                    list_fields.append(f'{field.name}.{related_field.name}')
+                    list_fields.append(
+                        f'{field.name}.{related_field.name}'  # type: ignore[union-attr]
+                    )
         return list_fields
 
     @classmethod
@@ -33,7 +35,7 @@ class BaseStrawberryResolver:
         result: list[SelectedFields] = []
         for field in fields:
             if field.selections:
-                obj = SelectedFields(owner=field.name.lower())
+                obj = SelectedFields(owner=field.name.lower())  # type: ignore[union-attr]
                 for selection in field.selections:
                     if selection.selections:
                         if remove_related:
@@ -42,6 +44,6 @@ class BaseStrawberryResolver:
                             cls._selections_to_selected_fields([selection], remove_related=False)
                         )
                     else:
-                        obj.fields.append(selection.name)
+                        obj.fields.append(selection.name)  # type: ignore[union-attr]
                 result.append(obj)
         return result

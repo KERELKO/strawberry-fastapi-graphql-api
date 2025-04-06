@@ -14,7 +14,13 @@ alembic = "^1.15.2"
 dishka = "^1.5.1"
 asyncpg = "^0.30.0"
 uvicorn = "^0.34.0"
+pytest-asyncio = "^0.26.0"
 
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.3.5"
+requests = "^2.32.3"
+httpx = "^0.28.1"
 
 [build-system]
 requires = ["poetry-core"]

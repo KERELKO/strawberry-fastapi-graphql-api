@@ -5,7 +5,7 @@ import sqlalchemy as sql
 from sqlalchemy.ext.asyncio import AsyncSession
 
 
-class BaseSQLAlchemyRepository:
+class BaseSQLAlchemyGateway:
     def __init__(self, session: AsyncSession) -> None:
         self.session = session
 
