@@ -75,13 +75,12 @@ def sqlalchemy_crud(
 
 
 def _add_method(model: Type[SQLAlchemyModel]) -> Callable:
-    async def add(self, dto: TypeDTO, commit_after_creation: bool = True) -> TypeDTO:
+    async def add(self, dto: TypeDTO) -> TypeDTO:
         values = dto.model_dump()
         new_entity = model(**values)
         self.session.add(new_entity)
-        if commit_after_creation:
-            await self.session.commit()
-            dto.id = new_entity.id
+        await self.session.commit()
+        dto.id = new_entity.id
         return dto
     return add
 
@@ -114,6 +113,7 @@ def _update_method(model: Type[SQLAlchemyModel]) -> Callable:
         if not updated_entity:
             raise ObjectDoesNotExistException(model.__name__, object_id=id)
         dto_class = MODELS_RELATED_TO_DTO[model]
+        await self.session.commit()
         return dto_class(**updated_entity.as_dict())
     return update
 
@@ -126,6 +126,7 @@ def _delete_method(model: Type[SQLAlchemyModel]) -> Callable:
         if not entity:
             raise ObjectDoesNotExistException(model.__name__, object_id=id)
         await self.session.delete(entity)
+        await self.session.commit()
         return True
     return delete
 

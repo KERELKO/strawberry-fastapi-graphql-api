@@ -67,6 +67,9 @@ class StrawberryProductResolver(BaseStrawberryResolver):
             return None
         return self.converter.convert(updated_product)  # type: ignore[arg-type]
 
-    async def delete(self, id: strawberry.ID) -> IDeleted:
-        is_deleted = await self.gw.delete(id=int(id))
-        return IDeleted(success=is_deleted)
+    async def delete(self, id: strawberry.ID) -> bool:
+        try:
+            await self.gw.delete(id=int(id))
+        except ObjectDoesNotExistException:
+            return False
+        return True

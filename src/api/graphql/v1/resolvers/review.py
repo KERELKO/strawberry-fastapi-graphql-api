@@ -73,6 +73,9 @@ class StrawberryReviewResolver(BaseStrawberryResolver):
         data['_user_id'] = data.pop('user_id')
         return Review(**data)
 
-    async def delete(self, id: strawberry.ID) -> IDeleted:
-        is_deleted = await self.gw.delete(id=int(id))
-        return IDeleted(success=is_deleted)
+    async def delete(self, id: strawberry.ID) -> bool:
+        try:
+            deleted = await self.gw.delete(id=int(id))
+        except ObjectDoesNotExistException:
+            deleted = False
+        return deleted

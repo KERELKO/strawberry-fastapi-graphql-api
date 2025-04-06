@@ -1,6 +1,6 @@
 import strawberry
 
-from src.api.graphql.v1.interfaces import IDeleted, IProduct
+from src.api.graphql.v1.interfaces import IDeleted, IProduct, IUpdated
 from src.api.graphql.v1.mutations.inputs import (ProductInput,
                                                  UpdateProductInput)
 from src.api.graphql.v1.resolvers.product import StrawberryProductResolver
@@ -20,19 +20,21 @@ class ProductMutations:
     @strawberry.mutation
     async def update_product(
         self, id: strawberry.ID, input: UpdateProductInput, info: strawberry.Info,
-    ) -> IProduct | None:
+    ) -> IUpdated:
         container = get_container(info)
         resolver = await container.get(StrawberryProductResolver)
         updated_product = await resolver.update(input=input, id=id)
-        return updated_product
+        if updated_product is None:
+            return IUpdated(message='Product not found', success=False)
+        return IUpdated(success=True, message='OK')
 
     @strawberry.mutation
     async def delete_product(self, id: strawberry.ID, info: strawberry.Info) -> IDeleted:
         container = get_container(info)
         resolver = await container.get(StrawberryProductResolver)
+        response = IDeleted(success=True)
         try:
-            deleted = await resolver.delete(id=id)
+            await resolver.delete(id=id)
         except ObjectDoesNotExistException:
-            deleted.message = 'Product with given ID is not found'
-            return deleted
-        return deleted
+            response.success = False
+        return response

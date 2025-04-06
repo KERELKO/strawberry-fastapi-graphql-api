@@ -21,7 +21,7 @@ class UserGateway(Protocol):
     async def add(self, dto: UserDTO) -> UserDTO:
         raise NotImplementedError
 
-    async def update(self, id: int, dto: UserDTO) -> UserDTO | None:
+    async def update(self, id: int, dto: UserDTO) -> UserDTO:
         raise NotImplementedError
 
     async def delete(self, id: int) -> bool:
@@ -50,7 +50,7 @@ class ProductGateway(Protocol):
     async def add(self, dto: ProductDTO) -> ProductDTO:
         raise NotImplementedError
 
-    async def update(self, id: int, dto: ProductDTO) -> ProductDTO | None:
+    async def update(self, id: int, dto: ProductDTO) -> ProductDTO:
         raise NotImplementedError
 
     async def delete(self, id: int) -> bool:
@@ -74,7 +74,7 @@ class ReviewGateway(Protocol):
     async def add(self, dto: ReviewDTO) -> ReviewDTO:
         raise NotImplementedError
 
-    async def update(self, id: int, dto: ReviewDTO) -> ReviewDTO | None:
+    async def update(self, id: int, dto: ReviewDTO) -> ReviewDTO:
         raise NotImplementedError
 
     async def delete(self, id: int) -> bool:

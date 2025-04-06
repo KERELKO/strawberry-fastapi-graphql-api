@@ -1,6 +1,6 @@
 import strawberry
 
-from src.api.graphql.v1.interfaces import IDeleted, IReview
+from src.api.graphql.v1.interfaces import IDeleted, IReview, IUpdated
 from src.api.graphql.v1.mutations.inputs import ReviewInput, UpdateReviewInput
 from src.api.graphql.v1.resolvers.review import StrawberryReviewResolver
 from src.api.graphql.v1.utils import get_container
@@ -19,19 +19,21 @@ class ReviewMutations:
     @strawberry.mutation
     async def update_review(
         self, input: UpdateReviewInput, id: strawberry.ID, info: strawberry.Info,
-    ) -> IReview:
+    ) -> IUpdated:
         container = get_container(info)
         resolver: StrawberryReviewResolver = await container.get(StrawberryReviewResolver)
         updated_review = await resolver.update(input=input, id=id)
-        return updated_review
+        if updated_review is None:
+            return IUpdated(success=False, message='Review not found')
+        return IUpdated(success=True, message='OK')
 
     @strawberry.mutation
     async def delete_review(self, id: strawberry.ID, info: strawberry.Info) -> IDeleted:
         container = get_container(info)
         resolver: StrawberryReviewResolver = await container.get(StrawberryReviewResolver)
+        response = IDeleted(success=True)
         try:
-            deleted: IDeleted = await resolver.delete(id=id)
+            await resolver.delete(id=id)
         except ObjectDoesNotExistException:
-            deleted.message = 'Review was not deleted'
-            return deleted
-        return deleted
+            response.success = False
+        return response

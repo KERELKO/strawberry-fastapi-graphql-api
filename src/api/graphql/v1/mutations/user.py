@@ -8,13 +8,6 @@ from src.api.graphql.v1.mutations.inputs import UpdateUserInput, UserInput
 
 
 @strawberry.type
-class DeletedUser(IDeleted):
-    id: strawberry.ID
-    success: bool
-    message: str | None = None
-
-
-@strawberry.type
 class UserMutations:
     @strawberry.mutation
     async def register_user(self, input: UserInput, info: strawberry.Info) -> IUser:
@@ -33,14 +26,12 @@ class UserMutations:
         return updated_user
 
     @strawberry.mutation
-    async def delete_user(self, id: strawberry.ID, info: strawberry.Info) -> DeletedUser:
+    async def delete_user(self, id: strawberry.ID, info: strawberry.Info) -> IDeleted:
         container = get_container(info)
         resolver: StrawberryUserResolver = await container.get(StrawberryUserResolver)
-        not_deleted = DeletedUser(id=id, success=False, message='User was not deleted')
+        response = IDeleted(success=True)
         try:
-            is_deleted = await resolver.delete(id=id)
+            await resolver.delete(id=id)
         except ObjectDoesNotExistException:
-            return not_deleted
-        if is_deleted:
-            return DeletedUser(id=id, success=True, message='User was deleted successfully!')
-        return not_deleted
+            response.success = False
+        return response

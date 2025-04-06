@@ -23,3 +23,9 @@ class IProduct:
 @strawberry.interface
 class IDeleted:
     success: bool
+
+
+@strawberry.interface
+class IUpdated:
+    success: bool
+    message: str
