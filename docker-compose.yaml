@@ -8,7 +8,6 @@ services:
       - .:/app
     ports:
       - '8000:8000'
-    command: ./entrypoint.sh
     depends_on:
       - db
   db:

@@ -2,8 +2,8 @@ from contextlib import asynccontextmanager
 
 from dishka import make_async_container
 
-from src.core.db.sqlalchemy import Database
-from src.core.di import AppContainer
+from product_service.core.db.sqlalchemy import Database
+from product_service.core.di import AppContainer
 
 BASE_GRAPHQL_URL = 'http://localhost:8000/graphql'
 

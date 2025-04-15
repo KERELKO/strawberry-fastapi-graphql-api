@@ -1,9 +1,12 @@
 [tool.poetry]
-name = "fastapi-product-service"
+name = "product_service"
 version = "0.1.0"
 description = ""
 authors = ["artorias <kerelkobarabash@gmail.com>"]
 readme = "README.md"
+packages = [
+    { include = "product_service", from = "src"}
+]
 
 [tool.poetry.dependencies]
 python = "^3.12"
@@ -14,13 +17,12 @@ alembic = "^1.15.2"
 dishka = "^1.5.1"
 asyncpg = "^0.30.0"
 uvicorn = "^0.34.0"
-pytest-asyncio = "^0.26.0"
-
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.3.5"
 requests = "^2.32.3"
 httpx = "^0.28.1"
+pytest-asyncio = "^0.26.0"
 
 [build-system]
 requires = ["poetry-core"]

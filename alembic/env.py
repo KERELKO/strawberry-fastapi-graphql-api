@@ -4,8 +4,8 @@ from logging.config import fileConfig
 from sqlalchemy import pool
 from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import async_engine_from_config
-from src.core.settings import config as app_config
-from src.core.db.sqlalchemy.models import *  # noqa
+from product_service.core.settings import config as app_config
+from product_service.core.db.sqlalchemy.models import *  # noqa
 
 from alembic import context
 
